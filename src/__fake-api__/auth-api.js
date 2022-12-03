@@ -9,7 +9,7 @@ class AuthApi {
   async login(request) {
     const { email, password } = request;
 
-    await axios.post('http://localhost/api/login', {
+    await axios.post('https://betadev.zebravpn.com/api/login', {
       username:email,
       password
     }).then((response) => {
@@ -45,7 +45,7 @@ class AuthApi {
   async register(request) {
     const { email, name, password } = request;
 
-    await axios.post('http://localhost/api/register', {
+    await axios.post('https://betadev.zebravpn.com/api/register', {
       email,
       password,
       password_confirmation:password
@@ -86,7 +86,7 @@ class AuthApi {
     const { accessToken } = request;
            // Decode access token
            const { userId,userToken } = decode(accessToken);
-           await axios.get('http://localhost/api/user', {
+           await axios.get('https://betadev.zebravpn.com/api/user', {
             headers: {
               Authorization: `Bearer ${userToken}`,
               "Content-Type": "application/json",
