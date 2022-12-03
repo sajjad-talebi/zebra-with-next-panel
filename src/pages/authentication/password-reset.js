@@ -2,13 +2,17 @@ import { useEffect } from 'react';
 import Head from 'next/head';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router';
-import { Box, Card, Container, Divider, Link, Typography } from '@mui/material';
+import { Box, Card, Container, Divider, Link, Typography ,TextField,Button} from '@mui/material';
+import { useFormik } from 'formik';
+import { backEndConfig } from '../../config';
 import { GuestGuard } from '../../components/authentication/guest-guard';
 import { AuthBanner } from '../../components/authentication/auth-banner';
 import { AmplifyPasswordReset } from '../../components/authentication/amplify-password-reset';
+import * as Yup from 'yup';
 import { Logo } from '../../components/logo';
 import { useAuth } from '../../hooks/use-auth';
 import { gtm } from '../../lib/gtm';
+import axios from 'axios';
 
 const platformIcons = {
   Amplify: '/static/icons/amplify.svg',
@@ -21,6 +25,30 @@ const PasswordReset = () => {
   const router = useRouter();
   const { platform } = useAuth();
   const { disableGuard } = router.query;
+  const formik = useFormik({
+    initialValues: {
+      email: '',
+      submit: null
+    },
+    validationSchema: Yup.object({
+      email: Yup
+        .string()
+        .email('Must be a valid email')
+        .max(255)
+        .required('Email is required'),
+    }),
+    onSubmit: async (values, helpers) => {
+
+      await axios.post(backEndConfig.back_end_address+'forgot-password', {
+        email: values.email
+      }).then((res) => {
+        alert(res.data.message)
+      }
+      ).catch((err) => {
+        alert(err.response.data.message)
+      } );
+    }
+  });
 
   useEffect(() => {
     gtm.push({ event: 'page_view' });
@@ -122,14 +150,40 @@ const PasswordReset = () => {
                 Reset your account password using your code
               </Typography>
             </Box>
-            <Box
-              sx={{
-                flexGrow: 1,
-                mt: 3
-              }}
-            >
-              {platform === 'Amplify' && <AmplifyPasswordReset />}
-            </Box>
+            <form
+              noValidate
+              onSubmit={formik.handleSubmit}>
+                    <Box
+                      sx={{
+                        flexGrow: 1,
+                        mt: 3
+                      }}
+                    >
+                          <TextField
+                error={Boolean(formik.touched.email && formik.errors.email)}
+                fullWidth
+                helperText={formik.touched.email && formik.errors.email}
+                label="Email Address"
+                margin="normal"
+                name="email"
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                type="email"
+                value={formik.values.email}
+              />
+                    </Box>
+                    <Box sx={{ mt: 2 }}>
+                <Button
+                  disabled={formik.isSubmitting}
+                  fullWidth
+                  size="large"
+                  type="submit"
+                  variant="contained"
+                >
+                  Register
+                </Button>
+              </Box>
+        </form>
             <Divider sx={{ my: 3 }} />
             {platform === 'Amplify' && (
               <div>
