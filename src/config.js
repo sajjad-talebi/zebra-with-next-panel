@@ -23,3 +23,7 @@ export const firebaseConfig = {
 export const gtmConfig = {
   containerId: process.env.NEXT_PUBLIC_GTM_CONTAINER_ID
 };
+export const backEndConfig = {
+  back_end_address: process.env.NEXT_PUBLIC_BACK_END_ADDRESS,
+  back_end_calback_address: process.env.NEXT_PUBLIC_BACK_END_CALBACK_ADDRESS
+};

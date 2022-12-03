@@ -2,6 +2,7 @@ import axios from 'axios';
 import { createResourceId } from '../utils/create-resource-id';
 import { decode, JWT_EXPIRES_IN, JWT_SECRET, sign } from '../utils/jwt';
 import { wait } from '../utils/wait';
+import { backEndConfig } from '../config';
 
 const users = [];
 
@@ -9,7 +10,7 @@ class AuthApi {
   async login(request) {
     const { email, password } = request;
 
-    await axios.post('https://betadev.zebravpn.com/api/login', {
+    await axios.post(backEndConfig.back_end_address+'login', {
       username:email,
       password
     }).then((response) => {
@@ -45,7 +46,7 @@ class AuthApi {
   async register(request) {
     const { email, name, password } = request;
 
-    await axios.post('https://betadev.zebravpn.com/api/register', {
+    await axios.post(backEndConfig.back_end_address+'register', {
       email,
       password,
       password_confirmation:password
@@ -86,14 +87,14 @@ class AuthApi {
     const { accessToken } = request;
            // Decode access token
            const { userId,userToken } = decode(accessToken);
-           await axios.get('https://betadev.zebravpn.com/api/user', {
+           await axios.get(backEndConfig.back_end_address+'user', {
             headers: {
               Authorization: `Bearer ${userToken}`,
               "Content-Type": "application/json",
             },
           }).then((response) => {
             if(response.data.status){
-              console.log(response.data);
+            
               users.push(response.data);
             };
           }).catch((error) => {
@@ -116,7 +117,8 @@ class AuthApi {
           avatar: user.profile_photo_url,
           email: user.email,
           name: user.name,
-          plan: user.plan
+          plan: user.plan,
+          userToken: userToken,
         });
       } catch (err) {
         console.error('[Auth Api]: ', err);

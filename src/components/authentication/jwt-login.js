@@ -11,16 +11,16 @@ export const JWTLogin = (props) => {
   const { login } = useAuth();
   const formik = useFormik({
     initialValues: {
-      email: '',
-      password: '',
+      email: 'sajjadtalebi27@gmail.com',
+      password: '555889747',
       submit: null
     },
     validationSchema: Yup.object({
       email: Yup
         .string()
-        .email('Must be a valid email')
+        // .email('Must be a valid email')
         .max(255)
-        .required('Email is required'),
+        .required('Email or User name is required'),
       password: Yup
         .string()
         .max(255)

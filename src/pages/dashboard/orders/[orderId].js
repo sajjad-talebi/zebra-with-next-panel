@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useRouter } from "next/router";
 import NextLink from 'next/link';
 import Head from 'next/head';
 import { format } from 'date-fns';
@@ -15,11 +16,62 @@ import { Calendar as CalendarIcon } from '../../../icons/calendar';
 import { ChevronDown as ChevronDownIcon } from '../../../icons/chevron-down';
 import { PencilAlt as PencilAltIcon } from '../../../icons/pencil-alt';
 import { gtm } from '../../../lib/gtm';
+import axios from 'axios';
+import { decode,} from '../../../utils/jwt';
+import { authApi } from '../../../__fake-api__/auth-api';
+import { backEndConfig } from '../../../config';
+//check result
+
 
 const OrderDetails = () => {
+  const router = useRouter();
+  const { orderId, NP_id } = router.query;
   const isMounted = useMounted();
   const [order, setOrder] = useState(null);
+  const [message, setMessage] = useState(null);
+  const [refererid, setRefererId] = useState(null);
+  const accessToken = globalThis.localStorage.getItem('accessToken');
 
+  
+  let params = new URLSearchParams({
+    NP_id: NP_id,
+    orderId: orderId,
+  });
+
+
+//get order
+const userOrder=async ()=>{
+  if (accessToken) {
+    const user = await authApi.me({ accessToken });
+
+  }
+  const { userId,userToken } = decode(accessToken);
+
+  await axios.post(backEndConfig.back_end_address+'payment/result', {
+    NP_id:params.get('NP_id'),
+    uuid: params.get('orderId'),
+  },
+{
+  headers: {
+    Authorization: `Bearer ${userToken}`,
+    "Content-Type": "application/json",
+  },
+}
+  ).then((response) => {
+    if(response.status==200){
+    if ( response.data.status) {
+      console.log(response.data);
+      setMessage(response.data.message);
+      setRefererId(response.data.reference_id);
+    };
+    
+    };
+  }).catch((error) => {
+    console.log(error);
+  });
+
+}
+userOrder()
   useEffect(() => {
     gtm.push({ event: 'page_view' });
   }, []);
@@ -60,6 +112,11 @@ const OrderDetails = () => {
           py: 8
         }}
       >
+        <div>
+          message{message}<br/>
+          {refererid?'referer id'+refererid:'no reference id'}
+    
+        </div>
         <Container maxWidth="md">
           <Box sx={{ mb: 4 }}>
             <NextLink

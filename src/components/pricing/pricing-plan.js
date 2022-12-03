@@ -1,10 +1,44 @@
 import propTypes from 'prop-types';
 import { Box, Button, Divider, Typography } from '@mui/material';
 import { Check as CheckIcon } from '../../icons/check';
+import { decode,} from '../../utils/jwt';
+import { backEndConfig } from '../../config';
+
+import axios from 'axios';
+import { authApi } from '../../__fake-api__/auth-api';
 
 export const PricingPlan = (props) => {
   const { cta, currency, description, features, image, name, popular, price, sx, ...other } = props;
+  const accessToken = globalThis.localStorage.getItem('accessToken');
 
+  const submit=async()=>{
+    if (accessToken) {
+      const user = await authApi.me({ accessToken });
+  
+    }
+    const { userId,userToken } = decode(accessToken);
+
+    await axios.post(backEndConfig.back_end_address+'payment/pay', {
+      amount:price,
+      calback_url:backEndConfig.back_end_calback_address,
+    },
+  {
+    headers: {
+      Authorization: `Bearer ${userToken}`,
+      "Content-Type": "application/json",
+    },
+  }
+    ).then((response) => {
+      if(response.status==200&&response.data.pay_link){
+        window.location.href=response.data.pay_link;
+      };
+    }).catch((error) => {
+      console.log(error);
+    });
+  }
+
+
+  
   return (
     <Box
       sx={{
@@ -105,6 +139,7 @@ export const PricingPlan = (props) => {
           <Button
             fullWidth
             variant={popular ? 'contained' : 'outlined'}
+            onClick={submit}
           >
             {cta}
           </Button>
